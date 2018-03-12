@@ -1,0 +1,32 @@
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using PetAdoptionApi.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace PetAdoptionApi.Context
+{
+    public class PetAdoptionContext : DbContext
+    {
+        private IConfigurationRoot _config;
+
+        public PetAdoptionContext(IConfigurationRoot config, DbContextOptions options)
+          : base(options)
+        {
+            _config = config;
+        }
+
+        public DbSet<Dog> Dogs { get; set; }
+        public DbSet<Cat> Cats { get; set; }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            base.OnConfiguring(optionsBuilder);
+
+            optionsBuilder.UseSqlServer(_config["ConnectionStrings:PetAdoptionContextConnection"]);
+        }
+    }
+}

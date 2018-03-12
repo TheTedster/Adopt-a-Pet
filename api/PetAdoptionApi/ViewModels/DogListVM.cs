@@ -13,6 +13,8 @@ namespace PetAdoptionApi.ViewModels
         public string Breed { get; set; }
         public string Age { get; set; }
         public int Years { get; set; }
-
+        public string ImageUrl { get; set; }
+        public string ThumbnailUrl { get; set; }
+        public string OriginUrl { get; set; }
     }
 }

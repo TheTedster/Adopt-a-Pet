@@ -17,7 +17,7 @@ namespace PetAdoptionApi
         [FunctionName("GetDogs")]
         public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)]HttpRequestMessage req, TraceWriter log)
         {
-            var dogRepository = new DogRepository();
+            var dogRepository = new DogRepository(null);// new Context.PetAdoptionContext(null, null));
             List<DogListVM> dogsToReturn = new List<DogListVM>();
 
             dogRepository.GetDogs().ForEach(d => dogsToReturn.Add(new DogListVM()
@@ -26,7 +26,10 @@ namespace PetAdoptionApi
                 Age = d.DogAge.ToString(),
                 Name = d.Name,
                 Breed = d.Breed.Name,
-                Years = d.Age
+                Years = d.Age,
+                ThumbnailUrl = d.ThumbnailUrl,
+                ImageUrl = d.ImageUrl,
+                OriginUrl = d.OriginUrl
             }));
 
             return req.CreateResponse<List<DogListVM>>(HttpStatusCode.OK, dogsToReturn, "application/json"); 

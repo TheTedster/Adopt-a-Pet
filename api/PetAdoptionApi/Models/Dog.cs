@@ -25,7 +25,7 @@ namespace PetAdoptionApi.Models
                     return DogAge.Adult;
                 }
             }
-        }
+        }        
     }
 
     public enum DogAge
