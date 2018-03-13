@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -6,7 +7,8 @@ using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Host;
-using PetAdoptionApi.Models;
+using Microsoft.EntityFrameworkCore;
+using PetAdoptionApi.Context;
 using PetAdoptionApi.Repositories;
 using PetAdoptionApi.ViewModels;
 
@@ -17,7 +19,17 @@ namespace PetAdoptionApi
         [FunctionName("GetDogs")]
         public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)]HttpRequestMessage req, TraceWriter log)
         {
-            var dogRepository = new DogRepository(null);// new Context.PetAdoptionContext(null, null));
+            var sqlConnection = ConfigurationManager.ConnectionStrings["PetAdoptionContextConnection"].ConnectionString;
+
+            var builder = new DbContextOptionsBuilder<PetAdoptionContext>();
+            builder.UseSqlServer(sqlConnection);
+            
+            
+
+            var petAdoptionContext = new PetAdoptionContext(builder.Options);
+            DbInitialiser.Initialize(petAdoptionContext);
+
+            var dogRepository = new DogRepository(petAdoptionContext);// new Context.PetAdoptionContext(null, null));
             List<DogListVM> dogsToReturn = new List<DogListVM>();
 
             dogRepository.GetDogs().ForEach(d => dogsToReturn.Add(new DogListVM()
