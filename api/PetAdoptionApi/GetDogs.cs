@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
@@ -15,30 +16,41 @@ using PetAdoptionApi.ViewModels;
 namespace PetAdoptionApi
 {
     public static class GetDogs
-    {        
+    {
+        private static DogRepository _dogRepository;
+
         [FunctionName("GetDogs")]
         public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)]HttpRequestMessage req, TraceWriter log)
         {
-            var sqlConnection = ConfigurationManager.ConnectionStrings["PetAdoptionContextConnection"].ConnectionString;
+            InitialiseRepositories();
 
-            var builder = new DbContextOptionsBuilder<PetAdoptionContext>();
-            builder.UseSqlServer(sqlConnection);
-            
-            
-
-            var petAdoptionContext = new PetAdoptionContext(builder.Options);
-            DbInitialiser.Initialize(petAdoptionContext);
-
-            var dogRepository = new DogRepository(petAdoptionContext);// new Context.PetAdoptionContext(null, null));
             List<DogListVM> dogsToReturn = new List<DogListVM>();
 
-            dogRepository.GetDogs().ForEach(d => dogsToReturn.Add(new DogListVM()
+            var qsPageSize = req.GetQueryNameValuePairs().SingleOrDefault(nv => nv.Key == "pageSize");
+            var qsPageNumber = req.GetQueryNameValuePairs().SingleOrDefault(nv => nv.Key == "page");
+            var qsSortBy = req.GetQueryNameValuePairs().SingleOrDefault(nv => nv.Key == "sortBy");
+
+            int pageSize = 50;
+            if ((qsPageSize.Equals(default(KeyValuePair<string,string>))) || (!int.TryParse(qsPageSize.Value, out pageSize)))
+                pageSize = 50;
+
+            int page = 1;
+            if ((qsPageNumber.Equals(default(KeyValuePair<string, string>))) || (!int.TryParse(qsPageNumber.Value, out page)))
+                page = 1;
+
+            DogRepository.DogSortBy dogSortBy = DogRepository.DogSortBy.DateAdded;
+            if (!Enum.TryParse<DogRepository.DogSortBy>(qsSortBy.Value, out dogSortBy))
+                dogSortBy = DogRepository.DogSortBy.DateAdded;
+
+
+            _dogRepository.GetDogs(pageSize, page, dogSortBy, true).ToList().ForEach(d => dogsToReturn.Add(new DogListVM()
             {
                 Id = d.Id,
                 Age = d.DogAge.ToString(),
                 Name = d.Name,
                 Breed = d.Breed.Name,
                 Years = d.Age,
+                DateAdded = d.Created,
                 ThumbnailUrl = d.ThumbnailUrl,
                 ImageUrl = d.ImageUrl,
                 OriginUrl = d.OriginUrl
@@ -63,6 +75,22 @@ namespace PetAdoptionApi
             return name == null
                 ? req.CreateResponse(HttpStatusCode.BadRequest, "Please pass a name on the query string or in the request body")
                 : req.CreateResponse(HttpStatusCode.OK, "Hello " + name);
+        }
+
+        private static void InitialiseRepositories()
+        {
+            var sqlConnection = ConfigurationManager.ConnectionStrings["PetAdoptionContextConnection"].ConnectionString;
+
+            var builder = new DbContextOptionsBuilder<PetAdoptionContext>();
+            builder.UseSqlServer(sqlConnection);
+
+
+
+            var petAdoptionContext = new PetAdoptionContext(builder.Options);
+            //DbInitialiser.Initialize(petAdoptionContext);
+
+            _dogRepository = new DogRepository(petAdoptionContext);// new Context.PetAdoptionContext(null, null));
+
         }
     }
 }

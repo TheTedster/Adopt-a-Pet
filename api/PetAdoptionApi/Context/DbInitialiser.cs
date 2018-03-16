@@ -11,8 +11,9 @@ namespace PetAdoptionApi.Context
     {
         public static void Initialize(PetAdoptionContext context)
         {
+            context.Database.EnsureDeleted();
             context.Database.EnsureCreated();
-
+            
             // Look for any students.
             if (context.Dogs.Any())
             {
