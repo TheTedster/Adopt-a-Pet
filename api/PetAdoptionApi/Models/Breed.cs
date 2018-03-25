@@ -10,5 +10,12 @@ namespace PetAdoptionApi.Models
     {
         public int Id { get; set; }
         public string Name { get; set; }
+        public AnimalType AnimalType { get; set; }
+    }
+
+    public enum AnimalType
+    {
+        Dog,
+        Cat
     }
 }

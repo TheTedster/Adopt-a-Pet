@@ -7,8 +7,7 @@ using System.Threading.Tasks;
 namespace PetAdoptionApi.Models
 {
     public class Dog : Animal
-    {
-        public Breed Breed { get; set; }
+    {        
         public DogAge DogAge {
             get
             {

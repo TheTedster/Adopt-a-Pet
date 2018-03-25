@@ -19,20 +19,20 @@ namespace PetAdoptionApi.Repositories
             _context = context;
 
         }
-        public IPagedList<Dog> GetDogs(int pageSize, int page, DogSortBy sortBy, bool sortAsc)
+        public IPagedList<Dog> GetDogs(int pageSize, int page, PetSortBy sortBy, bool sortAsc)
         {
             IQueryable<Dog> dogsToReturn = _context.Dogs.Include(d => d.Breed);
 
             switch (sortBy)
             {                    
-                case DogSortBy.Name:
+                case PetSortBy.Name:
                     if(sortAsc)
                         dogsToReturn = dogsToReturn.OrderBy(d => d.Name);
                     else
                         dogsToReturn = dogsToReturn.OrderByDescending(d => d.Name);
                     break;
 
-                case DogSortBy.Age:
+                case PetSortBy.Age:
                     if (sortAsc)
                         dogsToReturn = dogsToReturn.OrderBy(d => d.Age).ThenBy(d => d.Name);
                     else
@@ -41,7 +41,7 @@ namespace PetAdoptionApi.Repositories
 
                     break;
 
-                case DogSortBy.Breed:
+                case PetSortBy.Breed:
                     if (sortAsc)
                         dogsToReturn = dogsToReturn.OrderBy(d => d.Breed.Name).ThenBy(d => d.Name);
                     else
@@ -49,7 +49,7 @@ namespace PetAdoptionApi.Repositories
                     
                     break;
 
-                case DogSortBy.DateAdded:
+                case PetSortBy.DateAdded:
 
                     if (sortAsc)
                         dogsToReturn = dogsToReturn.OrderBy(d => d.Created).ThenBy(d => d.Name);
@@ -65,12 +65,6 @@ namespace PetAdoptionApi.Repositories
         }
 
 
-        public enum DogSortBy
-        {
-            Name,
-            Age,
-            Breed,
-            DateAdded
-        }
+        
     }
 }
